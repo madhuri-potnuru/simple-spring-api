@@ -50,12 +50,19 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonarcloud') {
-                    bat "mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.organization=${SONAR_ORGANIZATION} -Dsonar.host.url=https://sonarcloud.io"
-                }
+    steps {
+        withSonarQubeEnv('sonarcloud') {
+            withCredentials([string(credentialsId: 'login', variable: 'SONAR_TOKEN')]) {
+                bat "mvn sonar:sonar " +
+                    "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
+                    "-Dsonar.organization=${SONAR_ORGANIZATION} " +
+                    "-Dsonar.host.url=https://sonarcloud.io " +
+                    "-Dsonar.login=${SONAR_TOKEN}"
             }
         }
+    }
+}
+
 
         stage('Deploy') {
             steps {
